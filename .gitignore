@@ -1,0 +1,18 @@
+# env files
+.venv
+.env
+
+# Airflow's files
+airflow/logs
+airflow/airflow.cfg
+airflow/airflow.db
+airflow/airflow.db-shm
+airflow/airflow.db-wal
+airflow/simple_auth_manager_passwords.json.generated
+
+# Google's credentials
+credentials.json
+
+# Others
+__pycache__
+Doc.txt
