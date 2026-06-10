@@ -55,7 +55,6 @@ class CoinGeckoAPI:
             coins_raw = response.json()
     
             # Removing undesired keys
-            # top_coins = [{k: v for k, v in coin.items() if k in desired_keys} for coin in coins_raw]
             top_coins = [coin["id"] for coin in coins_raw]
 
         except Exception as e:

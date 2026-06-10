@@ -7,12 +7,12 @@ import pandas as pd
 from dotenv import load_dotenv
 from airflow.sdk import DAG, task, get_current_context
 from airflow.exceptions import AirflowException
-from airflow.providers.google.cloud.operators.gcs import GCSCreateBucketOperator
 from airflow.providers.google.cloud.hooks.gcs import GCSHook
+from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 
 from src.extracy import CoinGeckoAPI
 from src.transform import bronze_transform
-from src.configs import CRYPTO_BUCKET_CONFIG, BUCKET_NAME
+from src.configs import *
 
 load_dotenv()
 
@@ -24,16 +24,6 @@ with DAG(
     schedule=None,
     catchup=False
 ) as dag:
-
-    create_bucket = GCSCreateBucketOperator(
-        task_id="create_bucket",
-        bucket_name=BUCKET_NAME,
-        resource=CRYPTO_BUCKET_CONFIG,
-        storage_class="STANDARD",
-
-        retries=1,
-        retry_delay=15
-    ) 
 
     @task()
     def fetch_top_coins_task() -> list[str]:
@@ -94,7 +84,6 @@ with DAG(
         context = get_current_context()
 
         logical_date = context["logical_date"]
-        date_str = logical_date.strftime("%Y-%m-%d")                  
 
         hook = GCSHook(
             gcp_conn_id="google_cloud_default"
@@ -115,27 +104,45 @@ with DAG(
         # - Uploading transformed data to GCS --
         # --------------------------------------
 
-        object_name = f"bronze/{date_str}/hour{logical_date.hour:02d}.csv"
-        transformed_data = bronze_transform(market_data,logical_date.isoformat())
+        object_name = (
+            f"bronze/"
+            f"year={logical_date.year}/"
+            f"month={logical_date.month:02d}/"
+            f"day={logical_date.day:02d}/"
+            f"hour={logical_date.hour:02d}.parquet"
+        )
+        
+        transformed_data = bronze_transform(market_data,logical_date)
 
         df = pd.DataFrame(transformed_data)
+        df["snapshot_ts"] = pd.to_datetime(df["snapshot_ts"], utc=True)
 
-        with tempfile.NamedTemporaryFile(suffix=".csv") as f:
-            df.to_csv(f.name, index=False)
+        with tempfile.NamedTemporaryFile(suffix=".parquet") as f:
+            df.to_parquet(f.name, 
+                          index=False,
+                          engine="pyarrow",
+                          coerce_timestamps="us")
 
             hook.upload(
                 bucket_name=BUCKET_NAME,
                 object_name=object_name,
                 filename=f.name,
-                mime_type="text/csv"
+                mime_type="application/octet-stream",
             )
     
         return object_name
-    
+
     coins = fetch_top_coins_task()
 
     raw_object = fetch_and_upload_market_data(coins)
 
     bronze_object = bronze_transform_and_upload_task(raw_object)
 
-    create_bucket >> coins 
+    bronze_to_bq = BigQueryInsertJobOperator(
+        task_id="load_bronze_to_bigquery",
+        configuration=LOAD_TO_BQ_CONFIG(bronze_object),
+        project_id=PROJECT_ID,
+        location="US",
+    )
+
+    coins >> raw_object >> bronze_object >> bronze_to_bq
