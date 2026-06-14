@@ -62,6 +62,5 @@ solana
 * All monetary values are denominated in USD.
 * One record represents one cryptocurrency snapshot.
 * Timestamps are provided in ISO-8601 UTC format.
-* The `roi` field is currently not consumed by downstream layers.
 * Raw data must be stored exactly as returned by the API.
 * No filtering, flattening, or type conversion should occur in the Raw layer.

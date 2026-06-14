@@ -5,7 +5,11 @@ from airflow.providers.google.cloud.operators.gcs import GCSCreateBucketOperator
 from airflow.providers.google.cloud.operators.bigquery import (BigQueryCreateEmptyDatasetOperator,
                                                                BigQueryCreateTableOperator) 
 
-from src.configs import BUCKET_NAME, CRYPTO_BUCKET_CONFIG, PROJECT_ID, BRONZE_MARKET_DATA_TABLE_CONFIG
+from src.configs import (PROJECT_ID,
+                         BUCKET_NAME, 
+                         CRYPTO_BUCKET_CONFIG, 
+                         BRONZE_MARKET_DATA_TABLE_CONFIG,
+                         SILVER_MARKET_DATA_TABLE_CONFIG)
 
 with DAG(
     dag_id="setup_crypto_infra",
@@ -54,18 +58,27 @@ with DAG(
         task_id="create_gold_dateset"
     )
 
-    create_bronze_market_date_table = BigQueryCreateTableOperator(
+    create_bronze_market_data_table = BigQueryCreateTableOperator(
         project_id=PROJECT_ID,
         table_resource=BRONZE_MARKET_DATA_TABLE_CONFIG,
         dataset_id="bronze",
         table_id="market_data",
-
         location="US",
         task_id="create_bronze_market_data_table"
     )
 
+    create_silver_market_data_table = BigQueryCreateTableOperator(
+        project_id=PROJECT_ID,
+        table_resource=SILVER_MARKET_DATA_TABLE_CONFIG,
+        dataset_id="silver",
+        table_id="market_data_cleaned",
+        location="US",
+        task_id="create_silver_market_data_table"
+    )
+
     # TASK STREAM
 
-    (create_bucket >> create_bronze_dataset >> create_silver_dataset >> 
-    create_gold_dataset >> create_bronze_market_date_table)
+    # (create_bucket >> create_bronze_dataset >> create_silver_dataset >> 
+    # create_gold_dataset >> create_bronze_market_data_table)
 
+    create_silver_market_data_table

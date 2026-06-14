@@ -58,7 +58,7 @@ class CoinGeckoAPI:
             top_coins = [coin["id"] for coin in coins_raw]
 
         except Exception as e:
-            logger.info("Error %s when fetching the top coins", str(e))
+            logger.error("Error %s when fetching the top coins", str(e))
             
         return top_coins
 
@@ -77,7 +77,7 @@ class CoinGeckoAPI:
             "vs_currency" : "usd"
         }
 
-        logger.info("Fetching coin market data")
+        logger.error("Fetching coin market data")
 
         try:
             response = self.session.get(url, params=params)
@@ -86,7 +86,7 @@ class CoinGeckoAPI:
             coin_data = response.json()
 
         except Exception as e:
-            logger.info("Error %s when fetching coin market data", str(e))
+            logger.error("Error %s when fetching coin market data", str(e))
             coin_data = []
 
         return coin_data

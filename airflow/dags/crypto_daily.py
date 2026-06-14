@@ -1,6 +1,7 @@
 import os
 import json
 import tempfile
+import logging
 from datetime import datetime
 
 import pandas as pd
@@ -10,9 +11,11 @@ from airflow.exceptions import AirflowException
 from airflow.providers.google.cloud.hooks.gcs import GCSHook
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 
-from src.extracy import CoinGeckoAPI
+from src.extract import CoinGeckoAPI
 from src.transform import bronze_transform
 from src.configs import *
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -20,7 +23,7 @@ API_KEY = os.getenv("API_KEY")
 
 with DAG(
     dag_id="crypto_dag",
-    start_date=datetime(2026,1,1),
+    start_date=datetime(2026,1,1,0,0,0),
     schedule=None,
     catchup=False
 ) as dag:
@@ -114,8 +117,12 @@ with DAG(
         
         transformed_data = bronze_transform(market_data,logical_date)
 
+        # Make sure snapshot_ts is datetime, crucial step to avoid
+        # type problems when loading the data to BigQuery
         df = pd.DataFrame(transformed_data)
         df["snapshot_ts"] = pd.to_datetime(df["snapshot_ts"], utc=True)
+
+        logger.debug(f"df size: {len(df)}")
 
         with tempfile.NamedTemporaryFile(suffix=".parquet") as f:
             df.to_parquet(f.name, 
@@ -145,4 +152,14 @@ with DAG(
         location="US",
     )
 
-    coins >> raw_object >> bronze_object >> bronze_to_bq
+    bronze_to_silver = BigQueryInsertJobOperator(
+        task_id="bronze_to_silver",
+        configuration=BRONZE_TO_SILVER_JOB_CONFIG,
+        params={
+            "project_id": PROJECT_ID,
+        },
+        location="US"
+    )
+
+    coins >> raw_object >> bronze_object >> bronze_to_bq >> bronze_to_silver
+
