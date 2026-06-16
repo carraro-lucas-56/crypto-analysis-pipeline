@@ -161,5 +161,15 @@ with DAG(
         location="US"
     )
 
-    coins >> raw_object >> bronze_object >> bronze_to_bq >> bronze_to_silver
+    run_market_changes_query = BigQueryInsertJobOperator(
+        task_id="run_market_changes_query",
+        configuration=MARKET_CHANGES_JOG_CONFIG,
+        params={
+            "project_id" : PROJECT_ID
+        },
+        location="US"
+    )
+
+    (coins >> raw_object >> bronze_object >> bronze_to_bq >> 
+    bronze_to_silver >> run_market_changes_query)
 

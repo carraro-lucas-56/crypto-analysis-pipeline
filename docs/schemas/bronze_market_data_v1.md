@@ -17,31 +17,37 @@ The Bronze layer applies light transformations to the raw data:
 
 ## Record Structure
 
-| Field             | Type      |
-| ------------------|-----------|
-| coin_id           | STRING    |
-| symbol            | STRING    |
-| name              | STRING    |
-| current_price_usd | FLOAT     |
-| market_cap_usd    | INTEGER   |
-| market_cap_rank   | INTEGER   |
-| total_volume_usd  | INTEGER   |
-| snapshot_ts       | TIMESTAMP |
+| Field                 | Type      |
+| ----------------------|-----------|
+| coin_id               | STRING    |
+| symbol                | STRING    |
+| name                  | STRING    |
+| current_price_usd     | FLOAT     |
+| market_cap_usd        | INTEGER   |
+| market_cap_rank       | INTEGER   |
+| total_volume_usd      | INTEGER   |
+| circulating_supply    | INTEGER   |
+| ath                   | INTEGER   |
+| ath_change_percentage | FLOAT |
+| snapshot_ts           | TIMESTAMP |
 
 ---
 
 ## Transformation Rules
 
-| Bronze Field      | Raw Source Field | Transformation              |
-|-------------------|------------------|-----------------------------|
-| coin_id           | id               | Rename                      |
-| symbol            | symbol           | No change                   |
-| name              | name             | No change                   |
-| current_price_usd | current_price    | Cast to FLOAT and rename    |
-| market_cap_usd    | market_cap       | Cast to INTEGER and rename  |
-| market_cap_rank   | market_cap_rank  | Cast to INTEGER ane         |
-| total_volume_usd  | total_volume     | Cast to INTEGER and rename  |
-| snapshot_ts       | logical_date     | Added by pipeline           |
+| Bronze Field          | Raw Source Field      | Transformation              |
+|-----------------------|-----------------------|-----------------------------|
+| coin_id               | id                    | Rename                      |
+| symbol                | symbol                | No change                   |
+| name                  | name                  | No change                   |
+| current_price_usd     | current_price         | Cast to FLOAT and rename    |
+| market_cap_usd        | market_cap            | Cast to INTEGER and rename  |
+| market_cap_rank       | market_cap_rank       | Cast to INTEGER ane         |
+| total_volume_usd      | total_volume          | Cast to INTEGER and rename  |
+| circulating_supply    | circulating_supply    | Cast to INTEGER and rename  |
+| ath                   | ath                   | Cast to INTEGER and rename  |
+| ath_change_percentage | ath_change_percentage | Cast to FLOAT and rename    |
+| snapshot_ts           | logical_date          | Added by pipeline           |
 
 ---
 

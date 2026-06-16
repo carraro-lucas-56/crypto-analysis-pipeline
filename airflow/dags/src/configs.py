@@ -78,6 +78,21 @@ BRONZE_MARKET_DATA_SCHEMA = {
         "mode": "NULLABLE"
     },
     {
+        "name": "circulating_supply_usd",
+        "type": "INTEGER",
+        "mode": "NULLABLE"
+    },
+    {
+        "name": "ath_usd",
+        "type": "INTEGER",
+        "mode": "NULLABLE"
+    },
+    {
+        "name": "ath_change_percentage",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+    },
+    {
         "name": "snapshot_ts",
         "type": "TIMESTAMP",
         "mode": "NULLABLE"
@@ -123,10 +138,65 @@ SILVER_MARKET_DATA_SCHEMA = {
         "mode": "REQUIRED"
     },
     {
+        "name": "circulating_supply_usd",
+        "type": "INTEGER",
+        "mode": "REQUIRED"
+    },
+    {
+        "name": "ath_usd",
+        "type": "INTEGER",
+        "mode": "REQUIRED"
+    },
+    {
+        "name": "ath_change_percentage",
+        "type": "FLOAT",
+        "mode": "REQUIRED"
+    },
+    {
         "name": "snapshot_ts",
         "type": "TIMESTAMP",
         "mode": "REQUIRED"
     }
+    ]
+}
+
+MARKET_CHANGES_SCHEMA = {
+    "fields": [
+        {
+            "name": "coin_id",
+            "type": "STRING",
+            "mode": "REQUIRED"
+        },
+        {
+            "name": "market_cap_change_1h",
+            "type": "FLOAT",
+            "mode": "REQUIRED"
+        },
+        {
+            "name": "market_cap_change_percentage_1h",
+            "type": "FLOAT",
+            "mode": "REQUIRED"
+        },
+        {
+            "name": "price_change_1h",
+            "type": "FLOAT",
+            "mode": "REQUIRED"
+        },
+        {
+            "name": "current_price_change_percentage_1h",
+            "type": "FLOAT",
+            "mode": "REQUIRED"
+        },
+        {
+            "name": "rank_change_1h",
+            "type": "INTEGER",
+            "mode": "REQUIRED"
+        },
+        {
+            "name": "snapshot_ts",
+            "type": "TIMESTAMP",
+            "mode": "REQUIRED"
+        }
     ]
 }
 
@@ -148,9 +218,19 @@ SILVER_MARKET_DATA_TABLE_CONFIG = {
     "schema" : SILVER_MARKET_DATA_SCHEMA
 }
 
+MARKET_CHANGES_TABLE_CONFIG = {
+    "time_partitioning" : {
+        "type": "DAY",
+        "field": "snapshot_ts",   
+    },
+    "schema" : MARKET_CHANGES_SCHEMA
+}
+
 # ------------- QUERY STRINGS -------------
 
 BRONZE_TO_SILVER_QUERY=get_query_str_from_file(f"{SQL_DIR}/bronze_to_silver_query.sql")     
+
+MARKET_CHANGES_QUERY=get_query_str_from_file(f"{SQL_DIR}/market_changes.sql")     
 
 # ------------- JOB CONFIGS ---------------
 
@@ -172,6 +252,13 @@ def LOAD_TO_BQ_CONFIG(object_name: str) -> dict:
 BRONZE_TO_SILVER_JOB_CONFIG = {       
     "query": {
             "query": BRONZE_TO_SILVER_QUERY,
+            "useLegacySql": False,
+        }
+}
+
+MARKET_CHANGES_JOG_CONFIG = {       
+    "query": {
+            "query": MARKET_CHANGES_QUERY,
             "useLegacySql": False,
         }
 }

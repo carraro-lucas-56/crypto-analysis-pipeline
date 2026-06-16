@@ -10,16 +10,19 @@ This layer contains a curated subset of the raw CoinGecko market snapshot data, 
 
 ## Record Structure
 
-| Field              | Type      |
-| ------------------ | --------- |
-| coin_id            | STRING    |
-| symbol             | STRING    |
-| name               | STRING    |
-| current_price_usd  | FLOAT     |
-| market_cap_usd     | INTEGER   |
-| market_cap_rank    | INTEGER   |
-| total_volume_usd   | INTEGER   |
-| snapshot_ts        | TIMESTAMP |
+| Field                 | Type      |
+| --------------------- | --------- |
+| coin_id               | STRING    |
+| symbol                | STRING    |
+| name                  | STRING    |
+| current_price_usd     | FLOAT     |
+| market_cap_usd        | INTEGER   |
+| market_cap_rank       | INTEGER   |
+| total_volume_usd      | INTEGER   |
+| circulating_supply    | INTEGER   |
+| ath                   | INTEGER   |
+| ath_change_percentage | FLOAT     |
+| snapshot_ts           | TIMESTAMP |
 
 ---
 
@@ -67,6 +70,9 @@ snapshot_ts (DAY)
   "market_cap_usd": 2098456123456,
   "market_cap_rank": 1,
   "total_volume_usd": 45234123456,
+  "circulating_supply": 19000000,
+  "ath": 690000,
+  "ath_change_percentage": 42.7,
   "snapshot_ts": "2026-06-14T08:00:00Z"
 }
 ```
