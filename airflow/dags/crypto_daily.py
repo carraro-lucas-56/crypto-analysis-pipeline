@@ -23,8 +23,8 @@ API_KEY = os.getenv("API_KEY")
 
 with DAG(
     dag_id="crypto_dag",
-    start_date=datetime(2026,1,1,0,0,0),
-    schedule=None,
+    start_date=datetime(2026,6,20,21,0,0),
+    schedule='@hourly',
     catchup=False
 ) as dag:
 
@@ -170,6 +170,14 @@ with DAG(
         location="US"
     )
 
-    (coins >> raw_object >> bronze_object >> bronze_to_bq >> 
-    bronze_to_silver >> run_market_changes_query)
+    run_coin_volatility_query = BigQueryInsertJobOperator(
+        task_id="run_coin_volatility_query",
+        configuration=COIN_VOLATILITY_JOG_CONFIG,
+        params={
+            "project_id" : PROJECT_ID
+        },
+        location="US"
+    )
 
+    (coins >> raw_object >> bronze_object >> bronze_to_bq >> 
+    bronze_to_silver >> run_market_changes_query >> run_coin_volatility_query)

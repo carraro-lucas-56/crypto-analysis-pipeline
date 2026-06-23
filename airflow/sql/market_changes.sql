@@ -40,7 +40,7 @@ SELECT
     0
 ) AS current_price_change_percentage_1h,
   curr_h.market_cap_rank - prev_h.market_cap_rank AS rank_change_1h,
-  curr_h.snapshot_ts AS snapshot_ts
+  curr_h.snapshot_ts AS snapshot_ts,
 FROM 
   current_hour AS curr_h
 INNER JOIN 

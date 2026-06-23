@@ -200,6 +200,31 @@ MARKET_CHANGES_SCHEMA = {
     ]
 }
 
+COIN_VOLATILITY_SCHEMA = {
+    "fields": [
+        {
+            "name": "coin_id",
+            "type": "STRING",
+            "mode": "REQUIRED"
+        },
+        {
+            "name": "market_cap_volatility_24h",
+            "type": "FLOAT",
+            "mode": "REQUIRED"
+        },
+        {
+            "name": "num_of_observations",
+            "type": "INTEGER",
+            "mode": "REQUIRED"
+        },
+        {
+            "name": "snapshot_ts",
+            "type": "TIMESTAMP",
+            "mode": "REQUIRED"
+        }
+    ]
+}
+
 # ------------- TABLE CONFIGS -------------
 
 BRONZE_MARKET_DATA_TABLE_CONFIG = {
@@ -226,11 +251,21 @@ MARKET_CHANGES_TABLE_CONFIG = {
     "schema" : MARKET_CHANGES_SCHEMA
 }
 
+COIN_VOLATILITY_TABLE_CONFIG = {
+    "time_partitioning" : {
+        "type": "DAY",
+        "field": "snapshot_ts",   
+    },
+    "schema" : COIN_VOLATILITY_SCHEMA
+}
+
 # ------------- QUERY STRINGS -------------
 
 BRONZE_TO_SILVER_QUERY=get_query_str_from_file(f"{SQL_DIR}/bronze_to_silver_query.sql")     
 
 MARKET_CHANGES_QUERY=get_query_str_from_file(f"{SQL_DIR}/market_changes.sql")     
+
+COIN_VOLATILITY_QUERY=get_query_str_from_file(f"{SQL_DIR}/coin_volatility.sql")     
 
 # ------------- JOB CONFIGS ---------------
 
@@ -262,3 +297,11 @@ MARKET_CHANGES_JOG_CONFIG = {
             "useLegacySql": False,
         }
 }
+
+COIN_VOLATILITY_JOG_CONFIG = {       
+    "query": {
+            "query": COIN_VOLATILITY_QUERY,
+            "useLegacySql": False,
+        }
+}
+
