@@ -1,16 +1,26 @@
+from pathlib import Path
+
 from .utils import get_query_str_from_file
 
-DATA_DIR="/home/lucas/crypto-analysis/Data"
+PROJECT_ID = "crypto-analysis-pipeline"
 
-PROJECT_ID="crypto-analysis-pipeline"
+# --------------------------------------------------
+# ---------------- PATH CONFIG ---------------------
+# --------------------------------------------------
 
-SQL_DIR="/home/lucas/crypto-analysis/airflow/sql"
+# src/configs.py
+CURRENT_DIR = Path(__file__).resolve().parent
+
+# airflow/
+AIRFLOW_DIR = CURRENT_DIR.parent
+
+SQL_DIR = AIRFLOW_DIR / "sql"
 
 # -----------------------------------------
-# ------------ BUCKET CONFIGS -------------
+# -------------- BUCKET CONFIG ------------
 # -----------------------------------------
 
-BUCKET_NAME="crypto-data-56"
+BUCKET_NAME = "crypto-data-56"
 
 CRYPTO_BUCKET_CONFIG = {
             "lifecycle" : {
@@ -261,11 +271,11 @@ COIN_VOLATILITY_TABLE_CONFIG = {
 
 # ------------- QUERY STRINGS -------------
 
-BRONZE_TO_SILVER_QUERY=get_query_str_from_file(f"{SQL_DIR}/bronze_to_silver_query.sql")     
+BRONZE_TO_SILVER_QUERY=get_query_str_from_file(SQL_DIR / "bronze_to_silver_query.sql")     
 
-MARKET_CHANGES_QUERY=get_query_str_from_file(f"{SQL_DIR}/market_changes.sql")     
+MARKET_CHANGES_QUERY=get_query_str_from_file(SQL_DIR / "market_changes.sql")     
 
-COIN_VOLATILITY_QUERY=get_query_str_from_file(f"{SQL_DIR}/coin_volatility.sql")     
+COIN_VOLATILITY_QUERY=get_query_str_from_file(SQL_DIR / "coin_volatility.sql")     
 
 # ------------- JOB CONFIGS ---------------
 

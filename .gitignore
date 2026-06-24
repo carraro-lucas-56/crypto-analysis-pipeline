@@ -17,3 +17,4 @@ credentials.json
 __pycache__
 Doc.txt
 explore.ipynb
+deploy_dags.sh

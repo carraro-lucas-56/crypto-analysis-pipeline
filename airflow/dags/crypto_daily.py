@@ -1,12 +1,11 @@
-import os
 import json
 import tempfile
 import logging
 from datetime import datetime
 
 import pandas as pd
-from dotenv import load_dotenv
 from airflow.sdk import DAG, task, get_current_context
+from airflow.models import Variable
 from airflow.exceptions import AirflowException
 from airflow.providers.google.cloud.hooks.gcs import GCSHook
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
@@ -17,10 +16,6 @@ from src.configs import *
 
 logger = logging.getLogger(__name__)
 
-load_dotenv()
-
-API_KEY = os.getenv("API_KEY")
-
 with DAG(
     dag_id="crypto_dag",
     start_date=datetime(2026,6,20,21,0,0),
@@ -30,6 +25,8 @@ with DAG(
 
     @task()
     def fetch_top_coins_task() -> list[str]:
+        API_KEY = Variable.get("API_KEY")
+        
         coin_gecko_client = CoinGeckoAPI(API_KEY)
 
         coins = coin_gecko_client.get_top_coins(10)
@@ -45,6 +42,8 @@ with DAG(
         # --------------------------------------
         # --- Fetching the data from the API ---
         # --------------------------------------
+
+        API_KEY = Variable.get("API_KEY")
 
         coin_gecko_client = CoinGeckoAPI(API_KEY)
 
