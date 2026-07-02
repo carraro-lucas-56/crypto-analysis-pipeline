@@ -11,7 +11,8 @@ from src.configs import (PROJECT_ID,
                          BRONZE_MARKET_DATA_TABLE_CONFIG,
                          SILVER_MARKET_DATA_TABLE_CONFIG,
                          MARKET_CHANGES_TABLE_CONFIG,
-                         COIN_VOLATILITY_TABLE_CONFIG)
+                         COIN_VOLATILITY_TABLE_CONFIG,
+                         MARKET_SHARE_TABLE_CONFIG)
 
 with DAG(
     dag_id="setup_crypto_infra",
@@ -96,10 +97,19 @@ with DAG(
         task_id="create_coin_volatility_table"
     )
 
+    create_market_share_table = BigQueryCreateTableOperator(
+        project_id=PROJECT_ID,
+        table_resource=MARKET_SHARE_TABLE_CONFIG,
+        dataset_id="gold",
+        table_id="market_share",
+        location="US",
+        task_id="create_market_share_table"
+    )
+
     # TASK STREAM
 
-    (create_bucket >> create_bronze_dataset >> create_silver_dataset >> 
-    create_gold_dataset >> create_bronze_market_data_table >> 
+    (create_bucket >> create_bronze_dataset >> create_silver_dataset >>
+    create_gold_dataset >> create_bronze_market_data_table >>
     create_silver_market_data_table >> create_market_change_table >>
-    create_coin_volatility_table)
+    create_coin_volatility_table >> create_market_share_table)
 

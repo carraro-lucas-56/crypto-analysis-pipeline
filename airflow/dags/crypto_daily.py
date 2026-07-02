@@ -29,7 +29,7 @@ with DAG(
         
         coin_gecko_client = CoinGeckoAPI(API_KEY)
 
-        coins = coin_gecko_client.get_top_coins(10)
+        coins = coin_gecko_client.get_top_coins(50)
         
         if not coins:
             raise AirflowException()        
@@ -121,8 +121,6 @@ with DAG(
         df = pd.DataFrame(transformed_data)
         df["snapshot_ts"] = pd.to_datetime(df["snapshot_ts"], utc=True)
 
-        logger.debug(f"df size: {len(df)}")
-
         with tempfile.NamedTemporaryFile(suffix=".parquet") as f:
             df.to_parquet(f.name, 
                           index=False,
@@ -159,7 +157,7 @@ with DAG(
         },
         location="US"
     )
-
+ 
     run_market_changes_query = BigQueryInsertJobOperator(
         task_id="run_market_changes_query",
         configuration=MARKET_CHANGES_JOG_CONFIG,
@@ -178,5 +176,15 @@ with DAG(
         location="US"
     )
 
-    (coins >> raw_object >> bronze_object >> bronze_to_bq >> 
-    bronze_to_silver >> run_market_changes_query >> run_coin_volatility_query)
+    run_market_share_query = BigQueryInsertJobOperator(
+        task_id="run_market_share_query",
+        configuration=MARKET_SHARE_JOG_CONFIG,
+        params={
+            "project_id" : PROJECT_ID
+        },
+        location="US"
+    )
+
+    (coins >> raw_object >> bronze_object >> bronze_to_bq >>
+    bronze_to_silver >> run_market_changes_query >> run_coin_volatility_query >>
+    run_market_share_query)
